@@ -49,7 +49,7 @@ def get_console_handler(object):
         if isinstance(handler, logging.StreamHandler):
             if handler.stream in (sys.stdout, sys.stderr):
                 return handler
-    return None
+    raise LookupError #if no console handler found
 
 
 
@@ -102,7 +102,8 @@ def archive_logs(object,
 def wipe_archive(archive: str = 'archived_logs'):
     archive = inspect.stack()[1][1].rpartition('\\')[0] + '\\' + archive #find specified archive in caller's parent directory
     for file in os.listdir(archive):
-        os.remove(archive + '\\' + file)
+        if file.rpartition('.')[2] == 'log':
+            os.remove(archive + '\\' + file)
 
 
 
@@ -143,6 +144,20 @@ def merge_archived_logs(archive: str = 'archived_logs',
 
 
 
+def rotate_log_archive(object, count: int, archive: str = 'archived_logs', merge: bool = False, callout: bool = False):
+    archive = inspect.stack()[1][1].rpartition('\\')[0] + '\\' + archive #find specified archive in caller's parent directory
+
+    
+    file_list = os.listdir(archive)
+    while len(file_list) > count:
+        if merge == True:
+            pass
+        else:
+            os.remove(archive + '\\' + file_list[0])
+    archive_logs(object)
+
+
+
 if __name__ == '__main__':
     test_logger = log_setup('test_logs\\app.log', 'a', logger_name='root')
     test_logger.critical('Critical error test')
@@ -153,4 +168,5 @@ if __name__ == '__main__':
     #        test_logger.removeHandler(handler)
     #        handler.close()
     archive_logs(test_logger, source_file='test_logs/app.log')
-    merge_archived_logs(super_merge=True)
+    rotate_log_archive(test_logger, 0)
+    #merge_archived_logs(super_merge=True)
