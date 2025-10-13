@@ -5,6 +5,8 @@ import inspect
 import time
 from pathlib import Path
 
+
+
 def log_setup(log_file: str = 'app.log', log_file_mode: str = 'a', logger_name: str = 'app'):
     # ^ use log_file_mode = 'w' to clear leftover log_file contents with the start of each run, 'a' to append to current contents
 
@@ -39,6 +41,8 @@ def log_setup(log_file: str = 'app.log', log_file_mode: str = 'a', logger_name: 
     #return fully set up logger object
     return logger
 
+
+
 def get_console_handler(object):
     #cycle through handlers, check if it is a console handler. return since only 1 console handler will be used realistically
     for handler in object.handlers:
@@ -46,6 +50,8 @@ def get_console_handler(object):
             if handler.stream in (sys.stdout, sys.stderr):
                 return handler
     return None
+
+
 
 def archive_logs(object, 
                  archive_file: str = 'archived_logs\\' + '-'.join(map(str, time.localtime()[0:3])) + ' ' + 
@@ -67,17 +73,20 @@ def archive_logs(object,
             with open(archive_file, 'a') as archive_access:
                 log_file = open(handler.baseFilename, 'r')
                 archive_access.write(log_file.read())
-                log_file = open(handler.baseFilename, 'w')
+                log_file = open(handler.baseFilename, 'w') #clear source_file after its contents are moved to archive_file. do not os.remove() as permission issues may arise ("file currently in use by a process")
+                log_file.close()
                 return archive_file
     try: #if user wants to archive a log file no longer bound to the logger's handlers, specified in source_file:
-        source_file = inspect.stack()[1][1].rpartition('\\')[0] + '\\' + source_file #find specified source_file starting in caller's parent directory
+        source_file = inspect.stack()[1][1].rpartition('\\')[0] + '\\' + source_file #find specified source_file in caller's parent directory
         if os.path.isfile(source_file) == True:
             log_file = open(source_file, 'r')
         else: 
             raise FileNotFoundError
+        
         with open(archive_file, 'a') as archive_access:
             archive_access.write(log_file.read()) 
             log_file = open(source_file, 'w') #clear source_file after its contents are moved to archive_file. do not os.remove() as permission issues may arise ("file currently in use by a process")
+            log_file.close()
             return
     except FileNotFoundError:
         pass
@@ -87,14 +96,57 @@ def archive_logs(object,
     else:
         raise FileNotFoundError('Could not find a FileHandler instance in specified logger nor the specified source_file')
 
-#TO DO: comment code, merge archived logs, wipe archive
+
+
+def wipe_archive(archive: str = 'archived_logs'):
+    archive = inspect.stack()[1][1].rpartition('\\')[0] + '\\' + archive #find specified archive in caller's parent directory
+    for file in os.listdir(archive):
+        os.remove(archive + '\\' + file)
+
+
+
+def merge_archived_logs(archive: str = 'archived_logs', 
+                        merged_archive_file: str = 'archived_logs\\merged\\' + '-'.join(map(str, time.localtime()[0:3])) + ' ' + 
+                        ''.join(f'{time_element:02s}' for time_element in map(str, time.localtime()[3:6])) + '.log', 
+                        super_merge: bool = False):
+                        # ^ hence default merged_archive_file path is archived_logs\merged\YY-MM-DD HHmmSS based on time when function is called
+                        # ^ if super_merge = true, logs in arrhived_logs\merged will also be joined into one file
+    
+    archive = inspect.stack()[1][1].rpartition('\\')[0] + '\\' + archive #find specified archive in caller's parent directory
+    merged_archive_file = inspect.stack()[1][1].rpartition('\\')[0] + '\\' + merged_archive_file #append merged_archive_file path to caller's parent directory path
+    Path(merged_archive_file.rpartition('\\')[0]).mkdir(parents=True, exist_ok=True) #create merged_archive_file's parent folders if missing
+    
+    if super_merge == True:
+        for file in os.listdir(merged_archive_file.rpartition('\\')[0]):
+            if file != merged_archive_file.rpartition('\\')[2]: #prevents execution if given file is the one we are merging to
+                file = merged_archive_file.rpartition('\\')[0] + '\\' + file 
+                #paste all merged log files' contents into merged_archive_file and remove them
+                with open(merged_archive_file, 'a') as maf_access:
+                    file_access = open(file, 'r')
+                    maf_access.write(file_access.read())
+                    file_access.close()
+                    os.remove(file)
+
+    #paste all archived log files' contents into merged_archive_file and remove them
+    for file in os.listdir(archive):
+        file = archive + '\\' + file
+        if os.path.isfile(file):
+            with open(merged_archive_file, 'a') as maf_access:
+                file_access = open(file, 'r')
+                maf_access.write(file_access.read())
+                file_access.close()
+                os.remove(file)
+
+
 
 if __name__ == '__main__':
-    test_logger = log_setup('test_logs\\app.log', 'w', logger_name='root')
+    test_logger = log_setup('test_logs\\app.log', 'a', logger_name='root')
     test_logger.critical('Critical error test')
     test_logger.warning('Test warning')
-    for handler in test_logger.handlers:
-        if isinstance(handler, logging.FileHandler):
-            test_logger.removeHandler(handler)
-            handler.close()
+    #wipe_archive()
+    #for handler in test_logger.handlers:
+    #    if isinstance(handler, logging.FileHandler):
+    #        test_logger.removeHandler(handler)
+    #        handler.close()
     archive_logs(test_logger, source_file='test_logs/app.log')
+    #merge_archived_logs(super_merge=True)
