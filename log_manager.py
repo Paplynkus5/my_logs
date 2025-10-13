@@ -54,8 +54,9 @@ def get_console_handler(object):
 
 
 def archive_logs(object, 
-                 archive_file: str = 'archived_logs\\' + '-'.join(map(str, time.localtime()[0:3])) + ' ' + 
-                 ''.join(f'{time_element:02s}' for time_element in map(str, time.localtime()[3:6])) + '.log',
+                 archive_file: str = 'archived_logs\\' + 
+                     '-'.join(f'{time_element:02d}' for time_element in time.localtime()[0:3]) + ' ' 
+                    + ''.join(f'{time_element:02d}' for time_element in time.localtime()[3:6]) + '.log',
                  source_file: str = ''):
     # ^ hence default archive_file path is archived_logs\YY-MM-DD HHmmSS based on time when function is called
     #format input in same style as value returned by inspect.stack()[1][1]
@@ -106,11 +107,12 @@ def wipe_archive(archive: str = 'archived_logs'):
 
 
 def merge_archived_logs(archive: str = 'archived_logs', 
-                        merged_archive_file: str = 'archived_logs\\merged\\' + '-'.join(map(str, time.localtime()[0:3])) + ' ' + 
-                        ''.join(f'{time_element:02s}' for time_element in map(str, time.localtime()[3:6])) + '.log', 
+                        merged_archive_file: str = 'archived_logs\\merged\\' + 
+                            '-'.join(f'{time_element:02d}' for time_element in time.localtime()[0:3]) + ' ' 
+                            + ''.join(f'{time_element:02d}' for time_element in time.localtime()[3:6]) + '.log', 
                         super_merge: bool = False):
                         # ^ hence default merged_archive_file path is archived_logs\merged\YY-MM-DD HHmmSS based on time when function is called
-                        # ^ if super_merge = true, logs in arrhived_logs\merged will also be joined into one file
+                        # ^ if super_merge = true, logs in archived_logs\merged will also be joined into one file
     
     archive = inspect.stack()[1][1].rpartition('\\')[0] + '\\' + archive #find specified archive in caller's parent directory
     merged_archive_file = inspect.stack()[1][1].rpartition('\\')[0] + '\\' + merged_archive_file #append merged_archive_file path to caller's parent directory path
@@ -119,23 +121,25 @@ def merge_archived_logs(archive: str = 'archived_logs',
     if super_merge == True:
         for file in os.listdir(merged_archive_file.rpartition('\\')[0]):
             if file != merged_archive_file.rpartition('\\')[2]: #prevents execution if given file is the one we are merging to
-                file = merged_archive_file.rpartition('\\')[0] + '\\' + file 
-                #paste all merged log files' contents into merged_archive_file and remove them
+                file_path = merged_archive_file.rpartition('\\')[0] + '\\' + file 
+                #paste all merged log files' contents into merged_archive_file after a separator, and remove said files
                 with open(merged_archive_file, 'a') as maf_access:
-                    file_access = open(file, 'r')
+                    file_access = open(file_path, 'r')
+                    maf_access.write(f'\n----- Merged as {file} -----\n')
                     maf_access.write(file_access.read())
                     file_access.close()
-                    os.remove(file)
+                    os.remove(file_path)
 
-    #paste all archived log files' contents into merged_archive_file and remove them
+    #paste all archived log files' contents into merged_archive_file after a separator, and remove said files
     for file in os.listdir(archive):
-        file = archive + '\\' + file
-        if os.path.isfile(file):
+        file_path = archive + '\\' + file
+        if os.path.isfile(file_path):
             with open(merged_archive_file, 'a') as maf_access:
-                file_access = open(file, 'r')
+                file_access = open(file_path, 'r')
+                maf_access.write(f'----- Archived as {file} -----\n')
                 maf_access.write(file_access.read())
                 file_access.close()
-                os.remove(file)
+                os.remove(file_path)
 
 
 
@@ -149,4 +153,4 @@ if __name__ == '__main__':
     #        test_logger.removeHandler(handler)
     #        handler.close()
     archive_logs(test_logger, source_file='test_logs/app.log')
-    #merge_archived_logs(super_merge=True)
+    merge_archived_logs(super_merge=True)
