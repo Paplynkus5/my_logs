@@ -146,6 +146,7 @@ def merge_archived_logs(archive: str = 'archived_logs',
 
 
 def rotate_log_archive(object, count: int, archive: str = 'archived_logs', merge: bool = False, callout: bool = False):
+    raise NotImplementedError
     archive = inspect.stack()[1][1].rpartition('\\')[0] + '\\' + archive #find specified archive in caller's parent directory
 
     
