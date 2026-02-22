@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 
-def log_setup(log_file: str = 'app.log', log_file_mode: str = 'a', logger_name: str = 'app'):
+def log_setup(log_file: str = 'logs\\app.log', log_file_mode: str = 'a', logger_name: str = 'app'):
     # ^ use log_file_mode = 'w' to clear leftover log_file contents with the start of each run, 'a' to append to current contents
 
     #format log_file input in same style as value returned by inspect.stack()[1][1]
