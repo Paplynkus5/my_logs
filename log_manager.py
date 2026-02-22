@@ -35,7 +35,7 @@ def log_setup(log_file: str = 'logs\\app.log', log_file_mode: str = 'a', logger_
     log_file = inspect.stack()[1][1].rpartition('\\')[0] + '\\' + log_file #append log_file path to caller's parent directory path
     Path(log_file.rpartition('\\')[0]).mkdir(parents=True, exist_ok=True) #if log_file is set to be in a nested directory, create its parent folders if missing
     file_handler = logging.FileHandler(log_file, mode=log_file_mode)
-    file_handler.setLevel(logging.WARNING)
+    file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
 
