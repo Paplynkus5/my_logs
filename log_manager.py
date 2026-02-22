@@ -25,7 +25,7 @@ def log_setup(log_file: str = 'logs\\app.log', log_file_mode: str = 'a', logger_
         #example log message: (12:34:56.789) root: WARNING @ file.py, line 2137: Hello World!
 
     #set up console handler
-    if skip_console_handler == True:
+    if skip_console_handler == False:
         console_handler = logging.StreamHandler()
         console_handler.setLevel(logging.DEBUG)  
         console_handler.setFormatter(formatter)
