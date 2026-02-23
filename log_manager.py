@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 
-def log_setup(log_file: str = 'logs\\app.log', log_file_mode: str = 'a', logger_name: str = 'app', skip_console_handler: bool = False):
+def log_setup(log_file: str = 'logs\\app.log', log_file_mode: str = 'w', logger_name: str = 'app', skip_console_handler: bool = False):
     # ^ use log_file_mode = 'w' to clear leftover log_file contents with the start of each run, 'a' to append to current contents
 
     #format log_file input in same style as value returned by inspect.stack()[1][1]
@@ -161,14 +161,10 @@ def rotate_log_archive(object, count: int, archive: str = 'archived_logs', merge
 
 
 if __name__ == '__main__':
-    test_logger = log_setup('test_logs\\app.log', 'a', logger_name='root')
+    test_logger = log_setup('test_logs\\app.log', 'w', logger_name='root')
     test_logger.critical('Critical error test')
     test_logger.warning('Test warning')
-    #wipe_archive()
-    #for handler in test_logger.handlers:
-    #    if isinstance(handler, logging.FileHandler):
-    #        test_logger.removeHandler(handler)
-    #        handler.close()
+    test_logger.info(f'Console handler: {get_console_handler(test_logger)}')
     archive_logs(test_logger, source_file='test_logs/app.log')
-    rotate_log_archive(test_logger, 0)
-    #merge_archived_logs(super_merge=True)
+    merge_archived_logs(super_merge=True)
+    wipe_archive() 
