@@ -11,7 +11,7 @@ Built using the `logging` module available in pip.
 	**Takes following variables:** 
 
 	1) **log_file** (string) - relative path and filename to use for the logging file. *Default: '\logs\app.log'*
-	2) **log_file_mode** (string) - mode to use when opening the log file. Use `log_file_mode` = 'w' to clear leftover `log_file` contents with the start of each run, 'a' to append to current contents. *Default: 'a' (append)*
+	2) **log_file_mode** (string) - mode to use when opening the log file. Use `log_file_mode` = 'w' to clear leftover `log_file` contents with the start of each run, 'a' to append to current contents. *Default: 'w' (write)*
 	3) **logger_name** (string) - name for the logger object. *Default: 'app'*
 	4) **skip_console_handler** (bool) - set as `True` to skip creating the console handler. Useful for scripts that use the console for UI. *Default: `False`*
 
