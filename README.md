@@ -3,7 +3,7 @@ Basic reusable Python logging utility I've made to avoid repeating myself in my 
 Built using the `logging` module available in pip.
 
 
-# Available functions:
+# Available functions
 
 
 1) **log_setup**: Sets up a basic logger and its console and file handlers. 
@@ -45,6 +45,6 @@ Built using the `logging` module available in pip.
 	2) **merged_archive_file** (string) - relative path to a new file that should contain all archived logs' contents. *Default: 'archived_logs\merged\YY-MM-DD HHmmSS'*
 	3) **super_merge** (bool) - if `True`, logs in archived_logs\merged will also be joined into one file. *Default: `False`*
 
-## Work in progress:
+## Work in progress
 
 1) **rotate_log_archive** - function that archives all log files except a given number of newest ones.
